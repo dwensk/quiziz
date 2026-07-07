@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICT Quiz — 167 вопросов с вариантами</title>
+<style>
+:root{
+  --bg:#0e1a2b;
+  --card:#16263d;
+  --ink:#eef4fb;
+  --muted:#8fa7c4;
+  --line:#24405f;
+  --purple:#8854d0;
+  --blue:#3867d6;
+  --orange:#e58e26;
+  --red2:#c0392b;
+  --teal:#26c6a9;
+  --green:#2ecc71;
+  --red:#e74c3c;
+  --gold:#f7c744;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--ink);
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:14px;
+}
+.wrap{width:100%;max-width:720px}
+header{text-align:center;margin:6px 0 14px}
+header h1{font-size:1.2rem;letter-spacing:.05em;color:var(--teal);text-transform:uppercase}
+header p{color:var(--muted);font-size:.82rem;margin-top:3px}
+
+.topics{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:12px}
+.topics button{background:var(--card);border:1px solid var(--line);color:var(--muted);padding:6px 12px;border-radius:999px;font-size:.74rem;cursor:pointer}
+.topics button.active{background:var(--teal);color:#03302a;border-color:var(--teal);font-weight:700}
+
+.hud{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:.8rem;color:var(--muted)}
+.bar{flex:1;height:7px;background:var(--card);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--gold));width:0%;transition:.3s}
+.hud .pts{color:var(--gold);font-weight:700}
+.hud .streak{color:var(--orange);font-weight:700}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 18px;box-shadow:0 10px 34px rgba(0,0,0,.4)}
+.qtop{display:flex;justify-content:space-between;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.qtop .cat{color:var(--gold)}
+.qtext{font-size:1.05rem;line-height:1.5;min-height:74px;margin-bottom:16px}
+
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.opts{grid-template-columns:1fr}}
+.opt{
+  border:none;border-radius:12px;padding:16px 14px;min-height:76px;
+  font-size:.88rem;line-height:1.35;color:#fff;font-weight:600;cursor:pointer;
+  text-align:left;transition:transform .1s,filter .15s,opacity .2s;
+  display:flex;align-items:center;
+}
+.opt:active{transform:scale(.98)}
+.opt.c0{background:var(--purple)}
+.opt.c1{background:var(--blue)}
+.opt.c2{background:var(--orange)}
+.opt.c3{background:var(--red2)}
+.opt.correct{background:var(--green)!important;box-shadow:0 0 0 3px rgba(46,204,113,.4)}
+.opt.wrong{background:var(--red)!important;opacity:.9}
+.opt.dim{opacity:.35;filter:grayscale(.5)}
+.opt:disabled{cursor:default}
+
+.feedback{
+  margin-top:14px;border-radius:12px;padding:14px;display:none;animation:pop .25s ease;
+  border:1px solid var(--line);background:#10203a;
+}
+.feedback.show{display:block}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.feedback .verdict{font-weight:700;font-size:.95rem;margin-bottom:8px}
+.feedback .verdict.good{color:var(--green)}
+.feedback .verdict.badv{color:var(--red)}
+.feedback .ru{color:var(--muted);font-size:.86rem;line-height:1.5}
+.feedback .en{color:var(--teal);font-size:.88rem;line-height:1.5;margin-bottom:6px}
+.nextbtn{
+  margin-top:12px;width:100%;padding:14px;border:none;border-radius:12px;
+  background:var(--teal);color:#03302a;font-size:.98rem;font-weight:700;cursor:pointer;display:none;
+}
+.nextbtn.show{display:block}
+.nextbtn:active{transform:scale(.98)}
+
+.result{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:34px 22px;text-align:center;display:none}
+.result.show{display:block}
+.result h2{color:var(--teal)}
+.result .big{font-size:2.8rem;font-weight:800;color:var(--gold);margin:10px 0}
+.result .stats{color:var(--muted);font-size:.9rem;margin-bottom:6px}
+.result p{color:var(--muted);font-size:.9rem;margin-bottom:20px}
+.result button{background:var(--teal);color:#03302a;border:none;padding:13px 20px;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;margin:4px}
+.result .ghost{background:none;border:1px solid var(--line);color:var(--muted)}
+footer{margin-top:16px;color:var(--muted);font-size:.72rem;text-align:center;opacity:.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>ICT Quiz</h1>
+  <p>167 вопросов · 4 варианта ответа · как в Quizizz</p>
+</header>
+
+<div class="topics" id="topics"></div>
+
+<div class="hud">
+  <span id="pos">1/167</span>
+  <div class="bar"><i id="fill"></i></div>
+  <span class="pts">★ <b id="pts">0</b></span>
+  <span class="streak">🔥 <b id="streak">0</b></span>
+</div>
+
+<div class="card" id="card">
+  <div class="qtop"><span class="cat" id="cat"></span><span id="counter"></span></div>
+  <div class="qtext" id="qtext"></div>
+  <div class="opts" id="opts"></div>
+  <div class="feedback" id="feedback">
+    <div class="verdict" id="verdict"></div>
+    <div class="en" id="fen"></div>
+    <div class="ru" id="fru"></div>
+  </div>
+  <button class="nextbtn" id="nextbtn" onclick="next()">Дальше →</button>
+</div>
+
+<div class="result" id="result">
+  <h2>Квиз завершён!</h2>
+  <div class="big" id="pct">0%</div>
+  <div class="stats" id="stats"></div>
+  <p id="resText"></p>
+  <button onclick="reviewMistakes()">Повторить ошибки</button>
+  <button class="ghost" onclick="restart()">Заново</button>
+</div>
+
+<footer>Выбирай тему сверху, чтобы учить блоками · «Повторить ошибки» — пока не будет 100%</footer>
+</div>
+
+<script>
+// a = correct option (short EN), ru = translation/explanation
+const DATA=[
+{t:"Основы ИКТ",q:"1. Give a definition of computer?",a:"An electronic device that accepts data, processes it, stores it and produces output",ru:"Компьютер — электронное устройство, которое принимает, обрабатывает, хранит данные и выдаёт результат."},
+{t:"Основы ИКТ",q:"2. Since when have academic researchers used the term \"Information and Communication Technology\"?",a:"Since the 1980s",ru:"Термин ИКТ используется учёными с 1980-х годов."},
+{t:"Основы ИКТ",q:"3. What is the representation of the Data?",a:"Numbers, text, images, audio, video — in binary form (0 and 1)",ru:"Данные представляются числами, текстом, изображениями, аудио и видео; внутри компьютера — в двоичном виде."},
+{t:"Основы ИКТ",q:"4. What is the exchange of information over long distances by electronic means (all voice, data and video)?",a:"Telecommunications",ru:"Телекоммуникации — обмен информацией на больших расстояниях электронными средствами; относится ко всем видам передачи."},
+{t:"Основы ИКТ",q:"5. What is the concept of millions of networks connecting our world?",a:"The Internet",ru:"Интернет — миллионы сетей, соединяющих наш мир."},
+{t:"Основы ИКТ",q:"6. A collection of related documents and resources connected by hyperlinks and URLs?",a:"The World Wide Web (WWW)",ru:"Всемирная паутина — совокупность документов и ресурсов, связанных гиперссылками и URL."},
+{t:"Основы ИКТ",q:"7. Give the designation of the prefix \"tele\"?",a:"\"Far away\", \"at a distance\" (Greek)",ru:"«Теле» — греческая приставка, означающая «далеко», «на расстоянии»."},
+{t:"Основы ИКТ",q:"8. The application of scientific knowledge for practical purposes, especially in industry?",a:"Technology",ru:"Технология — применение научных знаний в практических целях, особенно в промышленности."},
+{t:"Основы ИКТ",q:"9. What is the focus of ICT?",a:"Communication technologies: Internet, wireless networks, cell phones",ru:"Фокус ИКТ — коммуникационные технологии: Интернет, беспроводные сети, мобильная связь."},
+{t:"Основы ИКТ",q:"10. The Greek prefix \"tele\" in the word \"telecommunications\" means?",a:"\"Distance / far off\"",ru:"«Теле» означает «расстояние / далеко» — связь на расстоянии."},
+{t:"ПО",q:"11. Call 2 types of system software?",a:"Operating systems and utility software",ru:"Два типа системного ПО: операционные системы и утилиты."},
+{t:"ПО",q:"12. Operating systems are responsible for what?",a:"Managing hardware and software resources: memory, processes, files, devices",ru:"ОС управляет аппаратными и программными ресурсами: памятью, процессами, файлами, устройствами."},
+{t:"ПО",q:"13. System software used to help, analyze, tune, optimize and maintain a computer?",a:"Utility software",ru:"Утилиты — системное ПО для анализа, настройки, оптимизации и обслуживания компьютера."},
+{t:"ПО",q:"14. Which term can be classified depending on what it is intended for?",a:"Software (system and application)",ru:"ПО классифицируется по назначению: системное и прикладное."},
+{t:"ПО",q:"15. Give a definition of mobile operating system?",a:"An OS designed for mobile devices (smartphones, tablets)",ru:"Мобильная ОС — операционная система для мобильных устройств: смартфонов, планшетов."},
+{t:"ПО",q:"16. Give a definition of operating system?",a:"System software that manages hardware/software resources and provides services for programs",ru:"ОС — системное ПО, управляющее ресурсами компьютера и предоставляющее сервисы программам."},
+{t:"ПО",q:"17. What helps users solve a particular problem or task (e.g. a word processor)?",a:"Application software",ru:"Прикладное ПО — помогает решать конкретные задачи (пример — текстовый процессор)."},
+{t:"ПО",q:"18. Call examples of utility programs?",a:"Antivirus, disk defragmenter, backup, archivers",ru:"Примеры утилит: антивирус, дефрагментатор, резервное копирование, архиваторы."},
+{t:"ПО",q:"19. The distinguishing ability between Utility Software and OS Software?",a:"Utilities are optional maintenance tools; the OS is essential for the computer to work",ru:"Утилиты — необязательные сервисные программы; ОС необходима для работы компьютера."},
+{t:"ПО",q:"20. Which mobile OS is supported on select Apple devices?",a:"iOS",ru:"iOS — мобильная ОС устройств Apple."},
+{t:"ПО",q:"21. Google's free open source stack: OS, middleware and key applications?",a:"Android",ru:"Android — открытый стек Google: ОС, промежуточное ПО и ключевые приложения."},
+{t:"ПО",q:"22. A set of electronic program instructions or data that a processor reads to perform a task?",a:"Software",ru:"Программное обеспечение — инструкции и данные, которые процессор читает для выполнения задач."},
+{t:"ПО",q:"23. What refers to the Utility Programs?",a:"System software: antivirus, archivers, disk tools, diagnostics",ru:"Утилиты относятся к системному ПО: антивирусы, архиваторы, дисковые утилиты, диагностика."},
+{t:"Архитектура",q:"24. Who first mentioned the documented architecture of the Analytical Engine in correspondence?",a:"Ada Lovelace",ru:"Ада Лавлейс — в переписке с Чарльзом Бэббиджем."},
+{t:"Архитектура",q:"25. Who described the stored program concept in two patent applications while building the Z1 (1936)?",a:"Konrad Zuse",ru:"Конрад Цузе — концепция хранимой программы при создании Z1."},
+{t:"Архитектура",q:"26. Whose 1945 paper \"The First Draft Report on EDVAC\" described the organization of logic gates?",a:"John von Neumann",ru:"Джон фон Нейман — «Первый проект отчёта об EDVAC», 1945."},
+{t:"Архитектура",q:"27. Give a definition of personal computer?",a:"A computer designed for use by one person at a time",ru:"ПК — компьютер, предназначенный для использования одним человеком."},
+{t:"Архитектура",q:"28. Give a definition of workstation?",a:"A powerful single-user computer for technical/scientific applications",ru:"Рабочая станция — мощный однопользовательский компьютер для технических и научных задач."},
+{t:"Архитектура",q:"29. Give a meaning of the term — bit?",a:"Binary digit — the smallest unit of information (0 or 1)",ru:"Бит — двоичная цифра, наименьшая единица информации (0 или 1)."},
+{t:"Архитектура",q:"30. In 1642, the \"Counting Machine\" was invented by whom?",a:"Blaise Pascal",ru:"Блез Паскаль — счётная машина «Паскалина», 1642."},
+{t:"Архитектура",q:"31. A basic, complete and functional hardware and software installation for computing performance?",a:"A computer system",ru:"Компьютерная система — полная функциональная установка аппаратного и программного обеспечения."},
+{t:"Архитектура",q:"32. A set of rules and methods describing functionality, organization and implementation of computer systems?",a:"Computer architecture",ru:"Архитектура компьютера — правила и методы, описывающие функциональность, организацию и реализацию систем."},
+{t:"Архитектура",q:"33. Random access memory — a storage device consisting of silicon microcircuits?",a:"RAM",ru:"ОЗУ (RAM) — оперативная память на кремниевых микросхемах."},
+{t:"Архитектура",q:"34–35. The unit that performs all arithmetic and logical operations?",a:"ALU (Arithmetic Logic Unit)",ru:"АЛУ — арифметико-логическое устройство, часть процессора."},
+{t:"Архитектура",q:"36. The fastest type of RAM that does not use the capacitive method?",a:"SRAM (Static RAM)",ru:"SRAM — статическая память, один из самых быстрых типов ОЗУ."},
+{t:"Архитектура",q:"37. What PC device is on plug-in boards on the motherboard or on the same chip as the CPU?",a:"The GPU (video adapter)",ru:"Графический процессор / видеоадаптер — на видеокарте или интегрирован в чип процессора."},
+{t:"Архитектура",q:"38. Give a definition of hardware?",a:"The physical components of a computer",ru:"Аппаратное обеспечение — физические компоненты компьютера."},
+{t:"Архитектура",q:"39. What applies to input devices?",a:"Keyboard, mouse, scanner, microphone, touchscreen",ru:"Устройства ввода: клавиатура, мышь, сканер, микрофон, сенсорный экран."},
+{t:"Архитектура",q:"40. The critical size that determines how much information you can store on a device?",a:"Storage capacity",ru:"Ёмкость памяти — определяет объём хранимой информации."},
+{t:"HCI",q:"41. What does HCI (Human Computer Interaction) study?",a:"The design, evaluation and implementation of interactive systems for human use",ru:"HCI изучает проектирование, оценку и реализацию интерактивных систем для людей."},
+{t:"HCI",q:"42. Give a definition of user interface?",a:"The means by which the user and the computer system interact",ru:"Пользовательский интерфейс — средства взаимодействия пользователя и компьютера."},
+{t:"HCI",q:"43. UI form where the user issues commands by selecting and clicking icons on screen?",a:"Graphical User Interface (GUI)",ru:"Графический интерфейс (GUI) — команды подаются нажатием на иконки."},
+{t:"HCI",q:"44. Character-oriented user interface type?",a:"Command Line Interface (CLI)",ru:"Интерфейс командной строки — символьно-ориентированный тип."},
+{t:"HCI",q:"45. The purpose of a graphical user interface (GUI)?",a:"To make interaction simple and intuitive with windows, icons, menus",ru:"Цель GUI — сделать взаимодействие простым и интуитивным (окна, иконки, меню)."},
+{t:"HCI",q:"46. Call a name of golden rule in HCI?",a:"\"Know your user\"",ru:"Золотое правило HCI — «Знай своего пользователя»."},
+{t:"HCI",q:"47. What three disciplines in HCI interact with each other?",a:"Computer science, cognitive psychology, design (ergonomics)",ru:"Информатика, когнитивная психология и дизайн (эргономика)."},
+{t:"HCI",q:"48. Call a goal of development of HCI?",a:"To improve usability: effective, safe and enjoyable interaction",ru:"Цель HCI — удобство: эффективное, безопасное и приятное взаимодействие."},
+{t:"Базы данных",q:"49. Give a definition of database?",a:"An organized collection of structured, related data stored electronically",ru:"База данных — организованная совокупность структурированных связанных данных."},
+{t:"Базы данных",q:"50. Three classical logical models of databases?",a:"Hierarchical, network, relational",ru:"Три классические модели: иерархическая, сетевая, реляционная."},
+{t:"Базы данных",q:"51. Give a definition of distributed database?",a:"A database stored on multiple computers/locations connected by a network",ru:"Распределённая БД — хранится на нескольких компьютерах, соединённых сетью."},
+{t:"Базы данных",q:"52. Give a definition of SQL?",a:"Structured Query Language — a language for managing relational databases",ru:"SQL — язык структурированных запросов для реляционных БД."},
+{t:"Базы данных",q:"53. Give a definition of object-relational mapping (ORM)?",a:"A technique mapping code objects to relational database tables",ru:"ORM — техника связывания объектов кода с таблицами реляционной БД."},
+{t:"Базы данных",q:"55. The meaning of organizing data according to the database model?",a:"Database design (data modeling)",ru:"Проектирование БД — организация данных по модели базы данных."},
+{t:"Базы данных",q:"56. Give a definition of normalization?",a:"Organizing data to reduce redundancy and improve integrity",ru:"Нормализация — организация данных для уменьшения избыточности и повышения целостности."},
+{t:"Базы данных",q:"57. A set of discrete pieces of information formatted for analysis or decision making?",a:"Data",ru:"Данные — дискретные фрагменты информации, организованные для анализа и решений."},
+{t:"Базы данных",q:"59. Give a notation for a large set of related data?",a:"A database",ru:"База данных — большой набор связанных данных."},
+{t:"Базы данных",q:"60. What is the concept of a computerized data storage system?",a:"A database management system (DBMS)",ru:"СУБД — компьютеризированная система хранения и управления данными."},
+{t:"Базы данных",q:"61. What is a flexible approach?",a:"Agile — an iterative approach with short cycles and constant feedback",ru:"Agile — гибкий итеративный подход с короткими циклами и обратной связью."},
+{t:"Data Mining",q:"62. Give a definition of decision tree?",a:"A tree-shaped model of decisions and consequences for classification/prediction",ru:"Дерево решений — древовидная модель решений и последствий."},
+{t:"Data Mining",q:"63. Give a definition of data analytics?",a:"The science of analyzing raw data to draw conclusions",ru:"Аналитика данных — наука анализа «сырых» данных для выводов."},
+{t:"Data Mining",q:"64. What is prediction as a data mining method?",a:"Discovering relationships between variables to forecast future values",ru:"Прогнозирование — выявление связей между переменными для предсказания будущих значений."},
+{t:"Data Mining",q:"65. What refers to Data mining methods?",a:"Classification, clustering, association, prediction, sequence discovery",ru:"Методы: классификация, кластеризация, ассоциация, прогнозирование, обнаружение последовательностей."},
+{t:"Data Mining",q:"66. Give a definition of clustering?",a:"Grouping similar objects into clusters without predefined classes",ru:"Кластеризация — группировка похожих объектов без заранее заданных классов."},
+{t:"Data Mining",q:"67. Give a definition of data analysis?",a:"Inspecting, cleaning and transforming data to discover useful information",ru:"Анализ данных — проверка, очистка и преобразование данных для получения информации."},
+{t:"Data Mining",q:"68. Give a definition of big data?",a:"Extremely large, complex data sets that traditional tools cannot process",ru:"Большие данные — огромные сложные наборы данных, не обрабатываемые традиционными средствами."},
+{t:"Data Mining",q:"69. Give a definition of Data Mining?",a:"Discovering hidden patterns and knowledge in large data sets",ru:"Data Mining — обнаружение скрытых закономерностей и знаний в больших данных."},
+{t:"Data Mining",q:"70. Give a definition of classification?",a:"Assigning objects to predefined classes based on attributes",ru:"Классификация — отнесение объектов к заранее определённым классам."},
+{t:"Data Mining",q:"71. Give a definition of sequence discovery?",a:"Finding patterns where events are connected in time",ru:"Обнаружение последовательностей — поиск закономерностей, где события связаны во времени."},
+{t:"Сети",q:"72. Give a definition of devices (in networks)?",a:"Physical equipment connected to a network: computers, routers, printers",ru:"Устройства — физическое оборудование сети: компьютеры, маршрутизаторы, принтеры."},
+{t:"Сети",q:"73. Give a definition of computer network?",a:"A group of interconnected computers that share resources and data",ru:"Компьютерная сеть — группа взаимосвязанных компьютеров, совместно использующих ресурсы."},
+{t:"Сети",q:"74. \"Sufficiently powerful computers for high speed data transmission and query processing\"?",a:"Servers",ru:"Серверы — мощные компьютеры для высокоскоростной передачи данных и обработки запросов."},
+{t:"Сети",q:"75. \"The physical medium in which information signals are transmitted\"?",a:"Communication channels (transmission medium)",ru:"Каналы связи — физическая среда передачи информационных сигналов."},
+{t:"Сети",q:"76. What type of network unites resources of computers located over long distances?",a:"WAN (Wide Area Network)",ru:"Глобальная сеть (WAN) объединяет компьютеры на больших расстояниях."},
+{t:"Сети",q:"77. Networks connecting hundreds of millions of computers worldwide (like the Internet)?",a:"Global networks",ru:"Глобальные сети — соединяют сотни миллионов компьютеров по всему миру."},
+{t:"Сети",q:"78. Technologies supporting the infrastructure that moves data across a network?",a:"Networking (network technologies)",ru:"Сетевые технологии — поддерживают инфраструктуру передачи данных."},
+{t:"Сети",q:"79. What is the meaning of confidentiality in network security?",a:"Information is accessible only to authorized parties",ru:"Конфиденциальность — доступ к информации только у авторизованных лиц."},
+{t:"Сети",q:"80. Give a definition of global network?",a:"A network covering countries and continents (e.g., the Internet)",ru:"Глобальная сеть — охватывает страны и континенты (например, Интернет)."},
+{t:"Сети",q:"81. What is the purpose of the local network?",a:"To connect computers in a limited area to share resources",ru:"Локальная сеть соединяет компьютеры в ограниченной зоне для общих ресурсов."},
+{t:"Сети",q:"82. A set of measures aimed at ensuring information security?",a:"Information protection",ru:"Защита информации — комплекс мер обеспечения информационной безопасности."},
+{t:"Безопасность",q:"83. Give a definition of cybersecurity?",a:"Protection of systems, networks and data from digital attacks",ru:"Кибербезопасность — защита систем, сетей и данных от цифровых атак."},
+{t:"Безопасность",q:"84. Ensuring that authorized parties can access information when needed?",a:"Availability",ru:"Доступность — авторизованные пользователи получают доступ, когда нужно."},
+{t:"Безопасность",q:"85. Give a definition of virus software?",a:"A malicious program that replicates by inserting copies into other programs",ru:"Вирус — вредоносная программа, размножающаяся внедрением копий в другие программы."},
+{t:"Безопасность",q:"86. Security method of forcing personnel to follow information handling rules?",a:"Coercion (compulsion)",ru:"Принуждение — персонал соблюдает правила под угрозой ответственности."},
+{t:"Безопасность",q:"87. A set of rules limiting access or placing restrictions on certain information?",a:"Regulation",ru:"Регламентация — правила, ограничивающие доступ к определённой информации."},
+{t:"Безопасность",q:"88. Give a definition of cyber threat?",a:"A potential malicious act seeking to damage or steal data",ru:"Киберугроза — потенциальное вредоносное действие для повреждения или кражи данных."},
+{t:"Безопасность",q:"89. Malicious code presented as an antivirus that actually injects viruses?",a:"A Trojan horse (fake antivirus)",ru:"Троян (ложный антивирус) — маскируется под защиту, но заражает систему."},
+{t:"Безопасность",q:"90. A complex data transformation using symmetric block-linking coding?",a:"Encryption (block cipher)",ru:"Шифрование (симметричное блочное) — сложное преобразование данных."},
+{t:"Безопасность",q:"91. What does the usage of cryptographic security services mean?",a:"Masking",ru:"Маскировка — метод защиты с использованием криптографических средств."},
+{t:"Интернет",q:"92. Give a definition of internet technology?",a:"Technologies for creating and supporting services on the Internet",ru:"Интернет-технологии — технологии создания и поддержки сервисов в Интернете."},
+{t:"Интернет",q:"93. The protocol where users must wait for a whole new page to load?",a:"HTTP",ru:"HTTP — при классических запросах пользователь ждёт загрузки всей страницы."},
+{t:"Интернет",q:"94. Give the designation of the prefix org?",a:"Non-commercial organizations (.org domain)",ru:".org — домен некоммерческих организаций."},
+{t:"Интернет",q:"95. A web address that uniquely identifies a document on the Internet?",a:"URL",ru:"URL — веб-адрес, уникально идентифицирующий документ в Интернете."},
+{t:"Интернет",q:"96. A symbolic string associated with an IP address?",a:"Domain name",ru:"Доменное имя — символьная строка, связанная с IP-адресом."},
+{t:"Интернет",q:"97. Give a definition of storage service provider?",a:"A company providing data storage space and management over a network",ru:"Провайдер хранения — компания, предоставляющая место и управление данными через сеть."},
+{t:"Интернет",q:"98. Access over the Internet to applications that would otherwise be on one's own PC?",a:"Cloud computing",ru:"Облачные вычисления — доступ через Интернет к приложениям вместо установки на свой ПК."},
+{t:"Интернет",q:"99. What can store more data, access it faster, and use less power than today's memory?",a:"Memristors",ru:"Мемристоры — перспективная технология памяти будущего."},
+{t:"Интернет",q:"100. What is used to attack database sites?",a:"SQL injection",ru:"SQL-инъекция — атака на сайты с базами данных."},
+{t:"Интернет",q:"101. Two categories of attacks on a Web server?",a:"Local and remote attacks",ru:"Атаки на веб-сервер: локальные и удалённые."},
+{t:"Облака",q:"102. Give a definition of cloud computing?",a:"Delivery of computing services (servers, storage, software) over the Internet",ru:"Облачные вычисления — предоставление вычислительных услуг через Интернет."},
+{t:"Облака",q:"103. A set of tools and services to make coding and deploying applications quick and efficient?",a:"PaaS (Platform as a Service)",ru:"PaaS — платформа как услуга: инструменты для разработки и развёртывания приложений."},
+{t:"Облака",q:"104. What is the meaning of Infrastructure as a Service (IaaS)?",a:"Provision of virtualized infrastructure: servers, storage, networks",ru:"IaaS — предоставление виртуализированной инфраструктуры: серверы, хранилища, сети."},
+{t:"Облака",q:"105. The layer consisting of all processes and components to deliver the app to the user?",a:"The application layer (SaaS)",ru:"Прикладной уровень (SaaS) — все процессы и компоненты доставки приложения пользователю."},
+{t:"Облака",q:"106. When was the first generation of mobile technology with analog transmission developed?",a:"In the late 1970s — early 1980s (1G)",ru:"1G с аналоговой передачей — конец 1970-х — начало 1980-х."},
+{t:"Облака",q:"107. What does the multi-tenancy advantage in mobile cloud computing mean?",a:"Many users share resources and infrastructure, reducing costs",ru:"Мультиарендность — пользователи делят ресурсы, что снижает стоимость."},
+{t:"Облака",q:"108. Mobile cloud application type enabling commerce using mobile devices?",a:"M-commerce (mobile commerce)",ru:"Мобильная коммерция — бизнес-модели торговли через мобильные устройства."},
+{t:"Облака",q:"109. Quality-of-service open issues in mobile cloud computing?",a:"Network latency, limited bandwidth, availability during mobility",ru:"Проблемы QoS: задержки сети, ограниченная пропускная способность, доступность при перемещении."},
+{t:"Мультимедиа",q:"110. Media element: still images digitized using scanners or generated on a computer?",a:"Graphics (images)",ru:"Графика — статичные изображения, оцифрованные или созданные на компьютере."},
+{t:"Мультимедиа",q:"111. What type of graphics operates with objects in 3D space?",a:"3D graphics",ru:"Трёхмерная графика — оперирует объектами в 3D-пространстве."},
+{t:"Мультимедиа",q:"112. Call three types of 3D modeling?",a:"Wireframe, surface, solid modeling",ru:"Каркасное, поверхностное и твердотельное моделирование."},
+{t:"Мультимедиа",q:"113. What type of 3D modeling is the easiest to use?",a:"Wireframe modeling",ru:"Каркасное моделирование — самый простой тип."},
+{t:"Мультимедиа",q:"114. What type of 3D modeling is more complex than wireframe modeling?",a:"Surface modeling",ru:"Поверхностное моделирование — сложнее каркасного."},
+{t:"Мультимедиа",q:"115. Who in 1895 sent his first wireless radio transmission?",a:"Guglielmo Marconi",ru:"Гульельмо Маркони, 1895 (в России в том же году — Попов)."},
+{t:"Мультимедиа",q:"116. Give a definition of multimedia?",a:"The combination of text, audio, images, animation and video delivered by computer",ru:"Мультимедиа — сочетание текста, аудио, изображений, анимации и видео."},
+{t:"Мультимедиа",q:"117. The most widely used and flexible way of presenting information on screen?",a:"Text",ru:"Текст — самый распространённый и гибкий способ представления информации."},
+{t:"Мультимедиа",q:"118. Multimedia type where the user cannot influence the output (e.g., video)?",a:"Linear multimedia",ru:"Линейное мультимедиа — пользователь не влияет на воспроизведение."},
+{t:"Мультимедиа",q:"119. What are the 2 types of multimedia?",a:"Linear and non-linear (interactive)",ru:"Два типа: линейное и нелинейное (интерактивное)."},
+{t:"Smart",q:"120. Give a definition of the internet of things?",a:"A network of physical objects with sensors and software exchanging data via the Internet",ru:"IoT — сеть физических объектов с датчиками и ПО, обменивающихся данными через Интернет."},
+{t:"Smart",q:"121. Distributed database storing a permanent and tamper-proof ledger of transactions?",a:"Blockchain",ru:"Блокчейн — постоянный, защищённый от подделки реестр транзакций."},
+{t:"Smart",q:"122. What is the meaning of environment-friendly?",a:"Not harmful to the environment",ru:"Экологичный — не наносящий вреда окружающей среде."},
+{t:"Smart",q:"123. Programming computers to play games against human opponents?",a:"Game playing (a direction of AI)",ru:"Игры — направление искусственного интеллекта: компьютер против человека."},
+{t:"Smart",q:"124. What is the meaning of robotics?",a:"A branch of engineering/AI: design, construction and use of robots",ru:"Робототехника — проектирование, создание и применение роботов."},
+{t:"Smart",q:"125. What is the meaning of green technology?",a:"Environmentally friendly technology that reduces harm to nature",ru:"Зелёные технологии — экологически чистые, снижающие вред природе."},
+{t:"Smart",q:"126. What is the meaning of smart home?",a:"A home with connected automated devices controlled remotely",ru:"Умный дом — автоматизированные устройства с дистанционным управлением."},
+{t:"Smart",q:"127. A trend of integrating Internet-connected technologies into a TV set?",a:"Smart TV",ru:"Smart TV — интеграция интернет-технологий в телевизор."},
+{t:"Smart",q:"128. The parameter of using eHealth and mHealth systems and connected medical devices?",a:"Smart healthcare (smart living)",ru:"Умное здравоохранение — eHealth, mHealth и подключённые медицинские устройства."},
+{t:"E-технологии",q:"129. The basic model for selling goods by one consumer to other consumers on the Internet?",a:"C2C (Consumer-to-Consumer)",ru:"C2C — модель «потребитель–потребителю»."},
+{t:"E-технологии",q:"130. What allows customers to access accounts and perform financial transactions through a website?",a:"Online banking (e-banking)",ru:"Онлайн-банкинг — доступ к счетам и финансовым операциям через сайт."},
+{t:"E-технологии",q:"131. What is the first calling of E-learning?",a:"Distance learning",ru:"Изначально электронное обучение называлось дистанционным обучением."},
+{t:"E-технологии",q:"132. Give a definition of E-democracy?",a:"The use of ICT in political processes for citizen participation",ru:"Электронная демократия — ИКТ в политических процессах для участия граждан."},
+{t:"E-технологии",q:"133. What was created for more effective, transparent and accessible work of government agencies?",a:"E-government",ru:"Электронное правительство — для эффективной, прозрачной и доступной работы госорганов."},
+{t:"E-технологии",q:"134. Call a type of sites you visit to buy something?",a:"E-commerce sites (online stores)",ru:"Сайты электронной коммерции — интернет-магазины."},
+{t:"E-технологии",q:"135. Give a definition of HTTP?",a:"HyperText Transfer Protocol — for transferring web pages",ru:"HTTP — протокол передачи гипертекста (веб-страниц)."},
+{t:"E-технологии",q:"136. A new form of organization of the activities of public authorities?",a:"E-government",ru:"Электронное правительство — новая форма организации органов власти."},
+{t:"E-технологии",q:"137. The basic model involving the interaction of consumers with the administration?",a:"C2A (Consumer-to-Administration)",ru:"C2A — взаимодействие потребителей с администрацией (государством)."},
+{t:"E-технологии",q:"138. A system of interacting systems ensuring modern quality of life via innovative, eco-friendly urban technologies?",a:"Smart city",ru:"Умный город — система систем: качество жизни через инновационные и экологичные технологии."},
+{t:"E-технологии",q:"139. Give a definition of cloud technology?",a:"Providing computing resources to the user as an online service",ru:"Облачные технологии — вычислительные ресурсы как онлайн-сервис."},
+{t:"Разное",q:"140. Software that is often technical and targeted at users with solid computer knowledge?",a:"Utility software",ru:"Утилиты — техническое ПО для опытных пользователей."},
+{t:"Разное",q:"141. A program designed to run other programs on a computer?",a:"The operating system",ru:"ОС — программа для запуска других программ."},
+{t:"Разное",q:"142. What is supercomputer?",a:"The fastest, most powerful computer for complex calculations",ru:"Суперкомпьютер — самый быстрый и мощный, для сложных вычислений."},
+{t:"Разное",q:"143. A very large, expensive computer supporting hundreds or thousands of users simultaneously?",a:"A mainframe",ru:"Мейнфрейм — большой дорогой компьютер для тысяч пользователей одновременно."},
+{t:"Разное",q:"144. The basic layer of software dealing with signals that control hardware components?",a:"BIOS",ru:"BIOS — базовый уровень ПО, управляющий сигналами аппаратных компонентов."},
+{t:"Разное",q:"145. Routines that applications allow users to create with built-in commands?",a:"Macros",ru:"Макросы — подпрограммы из встроенных команд приложений."},
+{t:"Разное",q:"146. Call three parts of HCI?",a:"The human, the computer, and the interaction",ru:"Три части HCI: человек, компьютер и взаимодействие."},
+{t:"Разное",q:"147. What will help the user enter direct instructions into the computer?",a:"The command line interface",ru:"Командная строка — прямой ввод инструкций в компьютер."},
+{t:"Разное",q:"148. Objects in a relational database that describe real world objects?",a:"Entities (tables)",ru:"Сущности (таблицы) — описывают объекты реального мира."},
+{t:"Разное",q:"149. What represents connection between objects?",a:"Relationships",ru:"Связи (отношения) — соединения между объектами БД."},
+{t:"Разное",q:"150. A part of Temporal mining predicting future values for time-dependent data?",a:"Time series analysis",ru:"Анализ временных рядов — прогноз будущих значений по данным, зависящим от времени."},
+{t:"Разное",q:"151. The technique summarizing a large chunk of data in a Web page or document?",a:"Summarization",ru:"Суммаризация — краткое изложение большого объёма данных."},
+{t:"Разное",q:"152. Network type uniting administrative units within a state or several neighboring states?",a:"Regional networks",ru:"Региональные сети — административные единицы внутри государства или соседних государств."},
+{t:"Разное",q:"153. Give a definition of network node?",a:"Any device connected to a network with its own address",ru:"Узел сети — любое устройство сети со своим адресом."},
+{t:"Разное",q:"154. What does software of Information Systems Security mean?",a:"Antivirus, firewalls, encryption tools, intrusion detection",ru:"Программные средства защиты: антивирусы, файрволы, шифрование, обнаружение вторжений."},
+{t:"Разное",q:"155. An action using a vulnerability of an information system, leading to a security policy breach?",a:"An attack",ru:"Атака — действие, использующее уязвимость и нарушающее политику безопасности."},
+{t:"Разное",q:"156. The instrument of making the appearance of the page using HTML and CSS?",a:"Web page layout (web design)",ru:"Вёрстка — создание внешнего вида страницы средствами HTML и CSS."},
+{t:"Разное",q:"157. A collective form of communication on the website?",a:"A forum",ru:"Форум — коллективная форма общения на сайте."},
+{t:"Разное",q:"158. Cloud type where access is available to any user with a subscription, from any location?",a:"Public cloud",ru:"Публичное облако — доступ любому пользователю с подпиской из любого места."},
+{t:"Разное",q:"159. The standard with better quality, signal protection, extra services and low-speed data?",a:"2G (GSM)",ru:"2G (GSM) — лучшее качество, защита сигнала, допуслуги, низкоскоростная передача данных."},
+{t:"Разное",q:"160. The most common file type for drawings and photographs: good quality but larger size?",a:"Raster graphics (JPEG/BMP)",ru:"Растровая графика — фото и рисунки: хорошее качество, но больший размер."},
+{t:"Разное",q:"161. Graphics designed to visualize indicators of an institution's activities?",a:"Business graphics",ru:"Деловая графика — визуализация показателей деятельности учреждения."},
+{t:"Разное",q:"162. Give an example of the SMART concept implementation?",a:"A smart city",ru:"Умный город — пример реализации концепции SMART."},
+{t:"Разное",q:"163. The parameter enabling intelligent mobility: low-emission vehicles, multimodal transport?",a:"Smart mobility",ru:"Умная мобильность — экологичный транспорт и мультимодальные системы."},
+{t:"Разное",q:"164. The basic model that is focused on the business partner?",a:"B2B (Business-to-Business)",ru:"B2B — модель «бизнес–бизнесу», ориентирована на бизнес-партнёра."},
+{t:"Разное",q:"165. One of the most prosperous electronic ventures: accounts and transactions via a website?",a:"Online banking",ru:"Онлайн-банкинг — одно из самых успешных электронных направлений."},
+{t:"Разное",q:"166. Give a definition of Information Retrieval System (IRS)?",a:"A system for storing, searching and retrieving information relevant to a query",ru:"ИПС — система хранения, поиска и выдачи информации по запросу."},
+{t:"Разное",q:"167. A set of models and algorithms for the steps of the search process (query image, selecting documents, evaluating)?",a:"Information retrieval technology",ru:"Технология информационного поиска — модели и алгоритмы этапов поиска."}
+];
+
+let deck=[], idx=0, pts=0, streak=0, ok=0, bad=0, wrong=[], topic="Все", locked=false;
+
+const topics=["Все",...new Set(DATA.map(d=>d.t))];
+const tEl=document.getElementById('topics');
+topics.forEach(t=>{
+  const b=document.createElement('button');
+  b.textContent=t;
+  if(t===topic)b.classList.add('active');
+  b.onclick=()=>{topic=t;document.querySelectorAll('.topics button').forEach(x=>x.classList.remove('active'));b.classList.add('active');restart();};
+  tEl.appendChild(b);
+});
+
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+
+function makeOptions(qi){
+  const correct=DATA[qi].a;
+  // distractors: answers from same topic first, then anywhere
+  let pool=DATA.map((d,i)=>i).filter(i=>i!==qi&&DATA[i].t===DATA[qi].t&&DATA[i].a!==correct);
+  let extra=DATA.map((d,i)=>i).filter(i=>i!==qi&&DATA[i].a!==correct);
+  shuffle(pool);shuffle(extra);
+  const seen=new Set([correct]);
+  const distractors=[];
+  for(const src of [pool,extra]){
+    for(const i of src){
+      if(distractors.length>=3)break;
+      const a=DATA[i].a;
+      if(!seen.has(a)){seen.add(a);distractors.push(a);}
+    }
+    if(distractors.length>=3)break;
+  }
+  return shuffle([correct,...distractors]);
+}
+
+function buildDeck(){
+  deck=DATA.map((d,i)=>i).filter(i=>topic==="Все"||DATA[i].t===topic);
+  shuffle(deck);
+}
+
+function render(){
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('card').style.display='block';
+  locked=false;
+  const qi=deck[idx], d=DATA[qi];
+  document.getElementById('cat').textContent=d.t;
+  document.getElementById('counter').textContent=`Вопрос ${idx+1} из ${deck.length}`;
+  document.getElementById('qtext').textContent=d.q;
+  document.getElementById('pos').textContent=`${idx+1}/${deck.length}`;
+  document.getElementById('fill').style.width=(idx/deck.length*100)+'%';
+  document.getElementById('pts').textContent=pts;
+  document.getElementById('streak').textContent=streak;
+  document.getElementById('feedback').classList.remove('show');
+  document.getElementById('nextbtn').classList.remove('show');
+  const opts=makeOptions(qi);
+  const box=document.getElementById('opts');
+  box.innerHTML='';
+  opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='opt c'+i;
+    b.textContent=o;
+    b.onclick=()=>answer(b,o,qi);
+    box.appendChild(b);
+  });
+}
+
+function answer(btn,chosen,qi){
+  if(locked)return;locked=true;
+  const correct=DATA[qi].a;
+  const good=chosen===correct;
+  document.querySelectorAll('.opt').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===correct)b.classList.add('correct');
+    else if(b===btn)b.classList.add('wrong');
+    else b.classList.add('dim');
+  });
+  const fb=document.getElementById('feedback');
+  const v=document.getElementById('verdict');
+  if(good){
+    ok++;streak++;
+    pts+=100+Math.min(streak-1,5)*20; // streak bonus
+    v.textContent=`Верно! +${100+Math.min(streak-1,5)*20} очков`+(streak>=3?` · серия ${streak} 🔥`:'');
+    v.className='verdict good';
+  }else{
+    bad++;streak=0;wrong.push(qi);
+    v.textContent='Неверно. Правильный ответ подсвечен зелёным.';
+    v.className='verdict badv';
+  }
+  document.getElementById('fen').textContent=correct;
+  document.getElementById('fru').textContent=DATA[qi].ru;
+  fb.classList.add('show');
+  document.getElementById('pts').textContent=pts;
+  document.getElementById('streak').textContent=streak;
+  document.getElementById('nextbtn').classList.add('show');
+}
+
+function next(){
+  if(idx+1>=deck.length){finish();return;}
+  idx++;render();
+}
+
+function finish(){
+  document.getElementById('card').style.display='none';
+  const r=document.getElementById('result');
+  r.classList.add('show');
+  const total=ok+bad;
+  const pct=total?Math.round(ok/total*100):0;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('stats').textContent=`Правильно: ${ok} · Ошибок: ${bad} · Очки: ${pts}`;
+  let msg;
+  if(pct>=90)msg='Красавчик! Ты готов к экзамену 🔥';
+  else if(pct>=70)msg='Хорошо! Добей ошибки — и будет идеально.';
+  else msg='Нормальный старт. Жми «Повторить ошибки» и закрепляй.';
+  document.getElementById('resText').textContent=msg;
+  document.getElementById('fill').style.width='100%';
+}
+
+function reviewMistakes(){
+  if(wrong.length===0){restart();return;}
+  deck=shuffle([...new Set(wrong)]);
+  wrong=[];idx=0;ok=0;bad=0;streak=0;
+  render();
+}
+
+function restart(){
+  buildDeck();
+  wrong=[];idx=0;pts=0;streak=0;ok=0;bad=0;
+  render();
+}
+restart();
+</script>
+</body>
+</html>
